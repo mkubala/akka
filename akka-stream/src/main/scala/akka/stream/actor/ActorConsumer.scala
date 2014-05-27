@@ -18,14 +18,14 @@ import akka.actor.ExtensionIdProvider
 object ActorConsumer {
 
   /**
-   * Attach a [[ActorConsumer]] actor as a [[org.reactivestreams.Consumer]]
-   * to a [[org.reactivestreams.Producer]] or [[akka.stream.Flow]].
+   * Attach a [[ActorConsumer]] actor as a [[org.reactivestreams.api.Consumer]]
+   * to a [[org.reactivestreams.api.Producer]] or [[akka.stream.Flow]].
    */
   def apply[T](ref: ActorRef): Consumer[T] = ActorConsumerImpl(ref)
 
   /**
-   * Java API: Attach a [[ActorConsumer]] actor as a [[org.reactivestreams.Consumer]]
-   * to a [[org.reactivestreams.Producer]] or [[akka.stream.Flow]].
+   * Java API: Attach a [[ActorConsumer]] actor as a [[org.reactivestreams.api.Consumer]]
+   * to a [[org.reactivestreams.api.Producer]] or [[akka.stream.Flow]].
    */
   def create[T](ref: ActorRef): Consumer[T] = apply(ref)
 
@@ -127,7 +127,7 @@ object ActorConsumer {
  * messages from the stream. It can also receive other, non-stream messages, in
  * the same way as any actor.
  *
- * Attach the actor as a [[org.reactivestreams.Consumer]] to the stream with
+ * Attach the actor as a [[org.reactivestreams.api.Consumer]] to the stream with
  * [[ActorConsumer#apply]].
  *
  * Subclass must define the [[RequestStrategy]] to control stream back pressure.
