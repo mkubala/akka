@@ -40,28 +40,33 @@ class TestProbeSpec extends AkkaSpec with DefaultTimeout {
       probe1.send(probe2.ref, "hello")
       probe2.expectMsg(0 millis, "hello")
       probe2.lastMessage.sender ! "world"
-      probe1.expectMsg(0 millis, "world")
+      probe1.expectMsg(0 millis, "some hint here", "world")
     }
 
-    "properly send and reply to messages, overloaded with hint" in {
-      val probe1 = TestProbe()
-      val probe2 = TestProbe()
-
-      case class MyMessage(payload: String)
-      probe1.send(probe2.ref, MyMessage("hello"))
-      probe2.expectMsg(0 millis, "some hint #1", MyMessage("hello"))
-      probe2.lastMessage.sender ! MyMessage("world")
-      probe1.expectMsg(0 millis, "some hint #2", MyMessage("world"))
-    }
-
-    "throw IllegalAssertionError with hint in message" in {
+    "throw AssertionError with hint in its message when max await time is exceeded" in {
       val probe = TestProbe()
 
       Try {
         probe.expectMsg(0 millis, "some hint", "hello")
       } match {
-        case scala.util.Failure(e: AssertionError) ⇒ assert(true)
-        case _                                     ⇒ assert(false)
+        case scala.util.Failure(e: AssertionError) ⇒ {
+          assert(e.getMessage.matches(""".*some hint.*"""))
+        }
+        case _ ⇒ assert(false)
+      }
+    }
+
+    "throw AssertionError with hint in its message when message doesn't match" in {
+      val probe = TestProbe()
+
+      probe.ref ! "hello"
+      Try {
+        probe.expectMsg(0 millis, "some hint", "bye")
+      } match {
+        case scala.util.Failure(e: AssertionError) ⇒ {
+          assert(e.getMessage.matches(""".*some hint.*"""))
+        }
+        case _ ⇒ assert(false)
       }
     }
 

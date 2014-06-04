@@ -332,7 +332,10 @@ trait TestKitBase {
    */
   def expectMsg[T](max: FiniteDuration, obj: T): T = expectMsg_internal(max.dilated, obj)
 
-  def expectMsg[T](max: FiniteDuration, hint: String, obj: T): T = ???
+  def expectMsg[T](max: FiniteDuration, hint: String = "", obj: T): T =
+    expectMsgPF(max.dilated, hint) {
+      case msg: T if (msg == obj) ⇒ msg
+    }
 
   private def expectMsg_internal[T](max: Duration, obj: T): T = {
     val o = receiveOne(max)
