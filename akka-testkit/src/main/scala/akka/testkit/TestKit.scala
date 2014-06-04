@@ -332,6 +332,8 @@ trait TestKitBase {
    */
   def expectMsg[T](max: FiniteDuration, obj: T): T = expectMsg_internal(max.dilated, obj)
 
+  def expectMsg[T](max: FiniteDuration, hint: String, obj: T): T = ???
+
   private def expectMsg_internal[T](max: Duration, obj: T): T = {
     val o = receiveOne(max)
     assert(o ne null, s"timeout ($max) during expectMsg while waiting for $obj")

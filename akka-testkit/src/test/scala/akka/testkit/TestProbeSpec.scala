@@ -9,6 +9,7 @@ import akka.actor._
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import akka.pattern.ask
+import scala.util.Try
 
 @org.junit.runner.RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class TestProbeSpec extends AkkaSpec with DefaultTimeout {
@@ -40,6 +41,28 @@ class TestProbeSpec extends AkkaSpec with DefaultTimeout {
       probe2.expectMsg(0 millis, "hello")
       probe2.lastMessage.sender ! "world"
       probe1.expectMsg(0 millis, "world")
+    }
+
+    "properly send and reply to messages, overloaded with hint" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+
+      case class MyMessage(payload: String)
+      probe1.send(probe2.ref, MyMessage("hello"))
+      probe2.expectMsg(0 millis, "some hint #1", MyMessage("hello"))
+      probe2.lastMessage.sender ! MyMessage("world")
+      probe1.expectMsg(0 millis, "some hint #2", MyMessage("world"))
+    }
+
+    "throw IllegalAssertionError with hint in message" in {
+      val probe = TestProbe()
+
+      Try {
+        probe.expectMsg(0 millis, "some hint", "hello")
+      } match {
+        case scala.util.Failure(e: AssertionError) ⇒ assert(true)
+        case _                                     ⇒ assert(false)
+      }
     }
 
     "have an AutoPilot" in {
